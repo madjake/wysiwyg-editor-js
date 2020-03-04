@@ -1,0 +1,132 @@
+<html lang="en">
+  <head>
+    <title>Write some things and stuff editor</title>
+    <meta charset="UTF-8">
+    <meta name="author" content="Jake Fournier">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" media="screen" href="https://cdn.quilljs.com/1.3.6/quill.snow.css">
+    <link rel="stylesheet" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/default.min.css">
+    <link rel="stylesheet" media="screen" href="https://cdn.quilljs.com/1.3.6/quill.bubble.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      #editor {
+        height: auto;
+        min-height: 100%;
+        font-size: 18px;
+      }
+      #editor .ql-editor {
+        overflow-y: visible;
+      }
+      #scrolling-container {
+        height: 100%;
+        min-height: 100%;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body onbeforeunload="return leavingPrompt()" >
+    <div id="scrolling-container">
+      <div id="toolbar-container">
+        <span class="ql-formats">
+          <select class="ql-font">
+          </select>
+          <select class="ql-size">
+            <option value="small"></option>
+            <!-- Note a missing, thus falsy value, is used to reset to default -->
+            <option selected></option>
+            <option value="large"></option>
+            <option value="huge"></option>
+          </select>
+        </span>
+        <span class="ql-formats">
+          <button type="button" class="ql-bold"></button>
+          <button type="button" class="ql-italic"></button>
+          <button type="button" class="ql-underline"></button>
+          <button type="button" class="ql-strike"></button>
+          <button class="ql-script" value="sub"></button>
+          <button class="ql-script" value="super"></button>
+        </span>
+        <span class="ql-formats">
+          <button type="button" class="ql-list" value="ordered"></button>
+          <button type="button" class="ql-list" value="bullet"></button>
+          <select class="ql-align">
+            <option selected="selected"></option>
+            <option value="center"></option>
+            <option value="right"></option>
+            <option value="justify"></option>
+          </select>
+        </span>
+        <span class="ql-formats">
+          <button type="button" class="ql-link"></button>
+          <button type="button" class="ql-image"></button>
+        </span>
+        <span class="ql-formats">
+          <button type="button" class="ql-blockquote"></button>
+          <button type="button" class="ql-code-block"></button>
+          <button type="button" class="ql-image"></button>
+          <button id="custom-button" title="Save as HTML" onclick="saveQuillContentAsHTML();return false;">Save</button>
+        </span>
+      </div>
+      <div id="editor"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script> 
+      var options = {
+        placeholder: 'Write something mediocre ...',
+        scrollingContainer: '#scrolling-container', 
+        theme: 'snow',
+        modules: { 
+          toolbar: '#toolbar-container',
+          syntax: true
+        }
+      };
+
+      // Fixes issue with buggy cursor behavior in code blocks. See for this fix 
+      // and details: https://github.com/quilljs/quill/issues/1988
+      (function(hljs){
+        hljs.highlightAuto = function(text) {
+          var noTrailing = text.replace(/\s+$/, '');
+          var lastNonWhitespaceIdx = noTrailing.length -1;
+          var leading = escape(text.substr(0, lastNonWhitespaceIdx));
+          var span = '<span class="hljs-caretcatcher">' + text[lastNonWhitespaceIdx] + '</span>';
+          var trailing = text.substr(lastNonWhitespaceIdx + 1);
+
+          return { "value": leading  + span + trailing };
+        }
+
+        function escape(string) {
+          return string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        window.hljs = hljs;
+      })(/*hljs object*/{}); 
+      
+      // Create the editor
+      var editor = new Quill('#editor', options);
+
+      function saveQuillContentAsHTML() {
+        var saveAsHTMLElement = document.createElement('a');
+        
+        saveAsHTMLElement.href = 'data:attachment/text,' + encodeURI(editor.root.innerHTML);
+        saveAsHTMLElement.target = '_blank';
+        saveAsHTMLElement.download = new Date()+'.txt';
+        saveAsHTMLElement.click();
+        saveAsHTMLElement.href = '';
+      }
+
+      function leavingPrompt() {
+        //Chrome will show their default and ignore this regardless of what we return
+        return "Your work will be lost if you haven't saved. Leave this page?";
+      }
+
+    </script>
+  </body>
+</html>

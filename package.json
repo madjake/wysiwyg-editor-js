@@ -1,0 +1,13 @@
+{
+  "name": "wysiwyg-local-editor",
+  "version": "1.0.0",
+  "description": "Prototype \"What you see is what you get\" editor using QuillJS.",
+  "scripts": {
+    "start": "http-server"
+  },
+  "author": "Jake Fournier",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^0.12.1"
+  }
+}
